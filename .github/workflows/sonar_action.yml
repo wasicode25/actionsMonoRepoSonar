@@ -67,14 +67,11 @@ jobs:
         name: unit_test_coverage
     - name: pintando coverage
       run: cat target/scala-2.12/scoverage-report/scoverage.xml
-    - name: cambiando directorio
-      working-directory: ./
-      run: ls
     - name: Replace all working directory paths with sources path
       #working-directory: target/scala-2.12/scoverage-report
       run: |
         ls
-        if [[ -n "scoverage.xml" ]]; then sed -i -e s,`pwd`,/github/workspace,g scoverage.xml; fi
+        if [[ -n "target/scala-2.12/scoverage-report/scoverage.xml" ]]; then sed -i -e s,`pwd`,/github/workspace,g target/scala-2.12/scoverage-report/scoverage.xml; fi
       shell: bash
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@v2.0.1
