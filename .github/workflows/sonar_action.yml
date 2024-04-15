@@ -1,0 +1,86 @@
+on:
+  # Trigger analysis when pushing in master or pull requests, and when creating
+  # a pull request. 
+  push:
+    branches:
+      - main
+
+name: SonarQube Scan
+jobs:
+  sonarqube:
+    name: SonarQube Trigger
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checking out
+      uses: actions/checkout@main
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    - name: Run tests Scala
+      run: |
+        sbt clean coverage test
+        sbt coverageAggregate
+    
+    - name: Check for Python files
+      id: checkpython
+      run: |
+        if find . -name "*.py" | grep -q .; then
+          echo "Python files found."
+          echo "HAS_PYTHON=true" >> $GITHUB_ENV
+        else
+          echo "No Python files found."
+          echo "HAS_PYTHON=false" >> $GITHUB_ENV
+        fi
+    - name: Install tox and any other packages
+      if: env.HAS_PYTHON == 'true'
+      run: pip install tox
+    - name: Run tox
+      if: env.HAS_PYTHON == 'true'
+      working-directory: ./
+      #working-directory: ./servipagos
+      run: 
+        tox -e py
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit_test_coverage
+        #path: ./servipagos/coverage.xml
+        path: |
+          target/scala-2.12/scoverage-report/scoverage.xml
+          coverage.xml
+        
+
+  recuperar_atifact:
+    needs: sonarqube
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checking out
+      uses: actions/checkout@main
+    - name: descargando artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: unit_test_coverage
+    - name: pintando coverage
+      run: cat target/scala-2.12/scoverage-report/scoverage.xml
+    - name: cambiando directorio
+      working-directory: ./
+      run: ls
+    - name: Replace all working directory paths with sources path
+      #working-directory: target/scala-2.12/scoverage-report
+      run: |
+        ls
+        if [[ -n "scoverage.xml" ]]; then sed -i -e s,`pwd`,/github/workspace,g scoverage.xml; fi
+      shell: bash
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@v2.0.1
+      env:
+        SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
+        SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+
+
+

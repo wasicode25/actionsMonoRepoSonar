@@ -1,0 +1,9 @@
+name: Nuevo
+on: push
+jobs:
+  custom-variable:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "hola $nombre como estas"
+        env:
+          nombre: Nicolas

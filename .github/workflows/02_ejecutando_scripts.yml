@@ -1,0 +1,14 @@
+name: CI
+on: push
+jobs:
+  ejemplo_script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4 
+      - name: Make the script files executable
+        run: chmod +x .github/scripts/saludo.sh
+      - name: Ejecutando mi script
+        run: ./.github/scripts/saludo.sh
+        shell: bash
+    

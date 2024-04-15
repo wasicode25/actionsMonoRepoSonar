@@ -1,0 +1,8 @@
+name: CI
+on: push
+jobs:
+  prod-chek-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Helo on branch $GITHUB_REF"
+    
