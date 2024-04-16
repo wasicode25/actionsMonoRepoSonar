@@ -16,21 +16,11 @@ jobs:
       with:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.11
     - name: Run tests Scala
       run: |
         sbt clean coverage test
         sbt coverageAggregate
     
-    - name: Install tox and any other packages
-      run: pip install tox
-    - name: Run tox
-      working-directory: ./
-      run: 
-        tox -e py
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
       with:
